@@ -30,3 +30,7 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Node.js / TypeScript (in src/)
+/src/node_modules
+/src/package-lock.json

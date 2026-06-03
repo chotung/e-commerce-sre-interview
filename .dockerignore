@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+
+# Ruby/Rails
+.bundle
+vendor/bundle
+tmp/
+log/
+*.log
+.byebug_history
+
+# IDEs
+.idea
+.vscode
+.ruby-lsp
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+REQUIREMENTS.md
+
+# Verification script
+src/
+
+# Node (for verification script)
+node_modules/
+npm-debug.log
+yarn-error.log

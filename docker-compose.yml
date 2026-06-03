@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:8.0
+    platform: linux/amd64
     container_name: ecommerce_mongodb
     environment:
       MONGO_INITDB_DATABASE: ecommerce_development

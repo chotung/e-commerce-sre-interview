@@ -7,6 +7,7 @@ RUN apt-get update -qq && \
     build-essential \
     git \
     curl \
+    libyaml-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory

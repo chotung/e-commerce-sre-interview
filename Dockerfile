@@ -1,5 +1,5 @@
 # Use Ruby 3.4.x
-FROM ruby:3.4.2-slim
+FROM ruby:3.4.4-slim
 
 # Install system dependencies
 RUN apt-get update -qq && \

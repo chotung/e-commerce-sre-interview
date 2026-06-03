@@ -18,9 +18,8 @@ fi
 # Create database if it doesn't exist (Mongoid handles this automatically)
 echo "Setting up database..."
 
-# Run database setup/migrations if needed
+# Create indexes if needed
 bundle exec rake db:create_indexes 2>/dev/null || true
-bundle exec rake db:seed 2>/dev/null || true
 
 echo "Starting Rails application..."
 

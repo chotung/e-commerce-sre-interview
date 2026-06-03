@@ -33,7 +33,7 @@ class CheckoutsController < ApplicationController
   def build_cart
     items = checkout_params[:items] || []
 
-    raise ActionController::BadRequest, "Cart is empty" if items.empty?
+    raise ErrorHandler::BadRequest, "Cart is empty" if items.empty?
 
     products = Product.where(
       :id.in => items.map { |item| item[:product_id] }
@@ -42,12 +42,12 @@ class CheckoutsController < ApplicationController
     line_items = items.map do |item|
       product = products[item[:product_id]]
 
-      raise ActionController::BadRequest, "Product not found" unless product
+      raise ErrorHandler::BadRequest, "Product not found" unless product
 
       quantity = item[:quantity].to_i
 
-      raise ActionController::BadRequest, "Invalid quantity" if quantity <= 0
-      raise ActionController::BadRequest, "Insufficient inventory" if product.inventory_count < quantity
+      raise ErrorHandler::BadRequest, "Invalid quantity" if quantity <= 0
+      raise ErrorHandler::BadRequest, "Insufficient inventory" if product.inventory_count < quantity
 
       {
         product_id: product.id.to_s,

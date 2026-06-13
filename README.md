@@ -4,10 +4,10 @@ A simple e-commerce API built with Rails 8, MongoDB, and Mongoid. This applicati
 
 ## Technology Stack
 
-- **Ruby**: 3.4.2
-- **Rails**: 8.0.5
+- **Ruby**: 3.4.4
+- **Rails**: 8.1.3
 - **MongoDB**: 8.0
-- **Mongoid**: 9.1
+- **Mongoid**: 9.1.0
 - **Docker**: For containerized deployment
 
 ## Prerequisites
@@ -202,6 +202,111 @@ The script will:
 - Exit with code 0 on success, non-zero on failure
 
 **Note**: Ensure the API is running and seeded before running the verification script.
+
+## Assumptions
+
+### Business Logic Assumptions
+
+1. **Tax Calculation**: Fixed at 8% on all orders (line 62 in `app/controllers/checkouts_controller.rb`)
+2. **Currency Handling**: All prices stored and returned in cents (integer) to avoid floating-point precision issues
+3. **Payment Processing**: No actual payment gateway integration - orders are immediately marked as "completed"
+4. **Customer Identity**: Email address is the only customer identifier; no user accounts or authentication
+5. **Inventory Management**:
+   - Inventory is decremented synchronously after order creation
+   - No atomic transactions between order creation and inventory updates
+   - Inventory checks happen at quote time, but could change before completion
+   - No inventory reservation system
+6. **Product Availability**: Only products with `active: true` are visible and purchasable
+7. **Pricing**:
+   - No discounts, promotions, or bulk pricing
+   - Line item totals calculated as `quantity × unit_price`
+   - Prices are static (no dynamic pricing)
+8. **Order Lifecycle**:
+   - No refund or cancellation functionality
+   - Orders are immediately "completed" with no intermediate states
+   - No order modification after creation
+9. **Cart Behavior**: Cart data is stateless (provided with each request, not stored server-side)
+
+### Technical Assumptions
+
+1. **Database**:
+   - MongoDB 8.0 as the primary database
+   - No database transactions used (inventory updates not atomic)
+   - Indexes created on commonly queried fields (name, category, active, email, status)
+
+2. **Security**:
+   - No authentication or authorization required
+   - No API rate limiting
+   - No CORS restrictions configured
+   - Email validation uses Ruby standard library (`URI::MailTo::EMAIL_REGEXP`)
+   - No input sanitization beyond Rails parameter filtering
+
+3. **Search & Filtering**:
+   - Product search uses case-insensitive regex matching (not full-text search)
+   - Pagination defaults: page 1, limit 25, max limit 100
+   - Products ordered alphabetically by name
+
+4. **Error Handling**:
+   - Standard HTTP status codes (400, 404, 422, 500)
+   - JSON error responses with `error` and `message` keys
+
+5. **Data Integrity**:
+   - No soft deletes (products can be marked inactive via `active` field)
+   - No audit trail for order or inventory changes
+   - No idempotency keys for order creation
+
+### Implementation Assumptions
+
+1. **Framework & Libraries**:
+   - Rails 8.1.3 with Mongoid ODM (not ActiveRecord)
+   - Ruby 3.4.4
+   - No additional gems for serialization (using plain hash-to-JSON conversion)
+   - No background job framework (Sidekiq, Resque, etc.)
+
+2. **Error Handling**:
+   - Custom `ErrorHandler` module for consistent error responses
+   - Exceptions raised and caught at application controller level
+
+3. **Code Organization**:
+   - Standard Rails MVC structure
+   - Models contain only validations and field definitions
+   - Controllers handle both business logic and presentation
+   - No concern modules or mixins (except Mongoid includes)
+
+4. **Data Access**:
+   - Mongoid ODM for MongoDB queries
+   - No query optimization (N+1 prevention, eager loading concerns with NoSQL)
+   - Index-aware queries for common filters (category, active status)
+   - In-memory collection operations (`.index_by`, `.sum`) for cart calculations
+
+5. **Testing Strategy**:
+   - Integration tests for end-to-end API behavior
+   - No unit tests for models or services
+   - TypeScript verification script for additional validation
+
+6. **Serialization**:
+   - Manual JSON serialization in controllers
+   - No serializer gems (ActiveModel::Serializers, Blueprinter, etc.)
+   - Simple hash-to-JSON conversion
+   - IDs converted to strings for MongoDB BSON ObjectIds
+
+7. **Validation**:
+   - Model-level validations using ActiveModel
+   - Controller-level parameter filtering with Strong Parameters
+   - Email validation using `URI::MailTo::EMAIL_REGEXP`
+   - Business rule validation in controllers (inventory checks, quantity validation)
+
+8. **Configuration**:
+   - Environment-based configuration for MongoDB connection
+   - Docker entrypoint script handles database setup
+
+9. **Deployment**:
+    - Docker Compose for local development
+    - No database migration strategy (beyond Rails migrations)
+
+10. **Dependencies**:
+    - Minimal external dependencies
+    - No third-party API integrations
 
 ## Development
 
